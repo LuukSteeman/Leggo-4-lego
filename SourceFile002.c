@@ -11,6 +11,7 @@ long nDeltaTime         = 0;
 
 const int kMaxSizeOfMessage = 30;
 const int INBOX = 5;
+int detected = 0;
 			TFileIOResult nBTCmdRdErrorStatus;
   		int nSizeOfMessage;
   		ubyte nRcvBuffer[kMaxSizeOfMessage];
@@ -25,15 +26,15 @@ const int INBOX = 5;
 |*                                                                                                        *|
 |*                                        ROBOT CONFIGURATION                                             *|
 |*    NOTES:                                                                                              *|
-|*    1)  The Light Sensor is attached to the back of the robot.                                          *|
+|*    1)  The Light Sensor is attached to the front of the robot.                                          *|
 |*    2)  Be sure to take readings of your Light Sensor over the light and dark areas.  Once you have     *|
 |*        the values, add them and divide by 2 to find your threshold.  Then, use your threshold as a     *|
 |*        comparison in your program.                                                                     *|
 |*                                                                                                        *|
 |*    MOTORS & SENSORS:                                                                                   *|
 |*    [I/O Port]              [Name]              [Type]              [Description]                       *|
-|*    Port A                motorB              NXT                 Right motor                         *|
-|*    Port B                 motorC              NXT                 Left motor                          *|
+|*    Port A                motorA              	NXT                 Right motor                         *|
+|*    Port B                 motorB              NXT                 Left motor                          *|
 |*    Port 1                  lightSensor         Light Sensor        front mounted                        *|
 |*	  Port 2									sonar1							ultrasonic sensor		front mounted												*|
 |*		Port 3									colorSensor					colorSensor					front mounted
@@ -47,80 +48,76 @@ task main()
 
 	while(true)                           // Infinite loop
 	{
-		motor[motorC] = 20;
-		if (SensorValue[sonar1] < 20) {
-			motor[motorA] = -50;
-			motor[motorB] = 50;
-			wait1Msec(450);
+		wait1Msec(2);
+		playSound(soundException);
+
+		if (SensorValue[sonar1] < 25) {
+			for(int i = 0; i = 20; i++){
+				motor[motorA] = -20 + (1 * i);
+				motor[motorB] = -20 + (1 * i);
+				wait1Msec(1000);
+			}
 		}
 
 		else if (SensorValue[colorSensor] ==  BLACKCOLOR) {
 			motor[motorA] = 0;
 			motor[motorB] = 0;
-				int j = 0;
+			int j = 0;
 
+		  while (true)
+		  {
+		    // Check to see if a message is available
 
-  while (true)
-  {
-    // Check to see if a message is available
+		    nSizeOfMessage = cCmdMessageGetSize(INBOX);
 
-    nSizeOfMessage = cCmdMessageGetSize(INBOX);
-
-    if (nSizeOfMessage > kMaxSizeOfMessage){
-      nSizeOfMessage = kMaxSizeOfMessage;
-    }
-    if (nSizeOfMessage > 0){
-    	nBTCmdRdErrorStatus = cCmdMessageRead(nRcvBuffer, nSizeOfMessage, INBOX);
-    	nRcvBuffer[nSizeOfMessage] = '\0';
-    	string s = "";
-    	stringFromChars(s, (char *) nRcvBuffer);
-    	displayCenteredBigTextLine(4, s);
-    	if (s == "UP") {
-    		motor[motorA] = -30;
-    		motor[motorB] = -30;
-    		wait1Msec(250);
-    	}
-    	else if (s == "LEFT") {
-    		motor[motorA] = -50;
-    		motor[motorB] = -20;
-    		wait1Msec(500);
-    	}
-    	else if (s == "RIGHT") {
-    		motor[motorA] = 40;
-    		motor[motorB] = -20;
-    		wait1Msec(400);
-    	}
-    	break;
-    }
-    wait1Msec(100);
-    j++;
-    if (j > 30) {
-    	motor[motorA] = -50;
-    	motor[motorB] = -50;
-    	wait1Msec(200);
-    	break;
-    }
-  }
- 	 }
+		    if (nSizeOfMessage > kMaxSizeOfMessage){
+		      nSizeOfMessage = kMaxSizeOfMessage;
+		    }
+		    if (nSizeOfMessage > 0){
+		    	nBTCmdRdErrorStatus = cCmdMessageRead(nRcvBuffer, nSizeOfMessage, INBOX);
+		    	nRcvBuffer[nSizeOfMessage] = '\0';
+		    	string s = "";
+		    	stringFromChars(s, (char *) nRcvBuffer);
+		    	displayCenteredBigTextLine(4, s);
+		    	if (s == "UP") {
+		    		motor[motorA] = -30;
+		    		motor[motorB] = -30;
+		    		wait1Msec(250);
+		    	}
+		    	else if (s == "LEFT") {
+		    		motor[motorA] = -50;
+		    		motor[motorB] = -20;
+		    		wait1Msec(500);
+		    	}
+		    	else if (s == "RIGHT") {
+		    		motor[motorA] = 40;
+		    		motor[motorB] = -20;
+		    		wait1Msec(400);
+		    	}
+		    	break;
+		    }
+		    wait1Msec(100);
+		    j++;
+		    if (j > 30) {
+		    	motor[motorA] = -50;
+		    	motor[motorB] = -50;
+		    	wait1Msec(200);
+		    	break;
+		    }
+		  }
+	 	}
 		else {
-		displayCenteredBigTextLine(4, "%d", SensorValue[lightSensor]);
-			motor[motorA] = -20 + ((60 - SensorValue[lightSensor]));
-			motor[motorB] = -20 - ((60 - SensorValue[lightSensor]));
-			/*if (SensorValue[lightSensor] < 55)  // If the Light Sensor reads a value less than 45:
-			{
-			motor[motorA] = 8;                  // Motor B is run at a 60 power level.
-			motor[motorB] = -18;                  // Motor C is run at a 20 power level.
+			displayCenteredBigTextLine(4, "%d", SensorValue[lightSensor]);
+			if ((60 < SensorValue[lightSensor]) && (SensorValue[lightSensor] < 65)){
+				motor[motorA] = -25;
+				motor[motorB] = -25;
 			}
-			else if (SensorValue[lightSensor] < 63) {
-				motor[motorA] = -30;
-				motor[motorB] = -30;
-			}
-			else                               // If the Light Sensor reads a value greater than or equal to 45:
-			{
-			motor[motorA] = -30;
-			motor[motorB] = 5;
 
-			}*/
+			else {
+			motor[motorA] = -15 + ((63 - SensorValue[lightSensor]) * 1.5);
+			motor[motorB] = -15 - ((63 - SensorValue[lightSensor]) * 1.5);
+			wait1Msec(20);
 			}
 		}
+	}
 }
