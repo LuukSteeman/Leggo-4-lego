@@ -72,6 +72,15 @@ void app_move(string s, bool bocht){
 
 }
 
+float power(float number,int n)
+{
+  float Z=number;
+  for (int i=1;i<n;i++)
+    Z*=number;
+  return Z;
+}
+
+
 task main()
 {
 
@@ -172,8 +181,8 @@ task main()
 		}
 	else if (stop_functie == 0 && intersection == false) {
 		displayCenteredBigTextLine(4, "%d", SensorValue[lightSensor]);
-			motor[motorA] = -20 + ((55 - SensorValue[lightSensor]));
-			motor[motorB] = -20 - ((55 - SensorValue[lightSensor]);
+			motor[motorA] = -20 + power((float)(55 - SensorValue[lightSensor]) / 5.15, 3);
+			motor[motorB] = -20 - power((float)(55 - SensorValue[lightSensor]) / 5.15, 3);
 		}
 	else if (stop_functie == 1) {
 		app_move(app_message, false);
